@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx"
 import Products from "./pages/Products.jsx"
 import ProductDetails from "./pages/ProductDetails.jsx"
 import About from "./pages/About.jsx"
+
 import OurTeam from "./pages/OurTeam.jsx"
 import TradeEvents from "./pages/TradeEvents.jsx"
 import Career from "./pages/Career.jsx"

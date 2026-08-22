@@ -30,7 +30,7 @@ const fadeIn = (dir = 0) => ({
 
 export default function Categories() {
   return (
-    <section className="overflow-hidden bg-white">
+    <section className="overflow-hidden bg-ivory">
 
       {/* ── Section header ── */}
       <div className="mx-auto max-w-[1280px] px-6 pt-20 pb-4 lg:px-16">
@@ -92,7 +92,7 @@ export default function Categories() {
                     "py-10",                          // mobile top+bottom padding
                     isEven
                       ? "lg:py-0 lg:pt-16 lg:pr-12"  // text-left col: offset down + right gap
-                      : "lg:py-0 lg:pt-24 lg:pl-16",  // text-right col: more offset + left gap
+                      : "lg:py-0 lg:pt-16 lg:pl-16",  // text-right col: offset down + left gap
                   ].join(" ")}
                 >
                   {/* Ghost index number */}
