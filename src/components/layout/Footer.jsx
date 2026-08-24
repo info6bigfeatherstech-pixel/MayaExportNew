@@ -7,42 +7,48 @@ import {
 /* ─── Data ─────────────────────────────────────────────────────────────── */
 
 const socials = [
-  { icon: Linkedin,  label: "LinkedIn",  href: "https://linkedin.com" },
-  { icon: Facebook,  label: "Facebook",  href: "https://facebook.com" },
+  { icon: Linkedin, label: "LinkedIn", href: "https://linkedin.com" },
+  { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
   { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
-  { icon: Twitter,   label: "Twitter",   href: "https://twitter.com" },
-  { icon: Youtube,   label: "YouTube",   href: "https://youtube.com" },
+  { icon: Twitter, label: "Twitter", href: "https://twitter.com" },
+  { icon: Youtube, label: "YouTube", href: "https://youtube.com" },
 ]
 
 const chinaOffice = [
-  { icon: MapPin,  text: "Room 2801, 28/F, Shenzhen Kerry Centre, Renmin South Road, Shenzhen, China 518001" },
-  { icon: Phone,   text: "+86 755 2222 8888", href: "tel:+8675522228888" },
-  { icon: Printer, text: "+86 755 2222 8889" },
-  { icon: Mail,    text: "shenzhen@mayaexports.com", href: "mailto:shenzhen@mayaexports.com" },
+  { 
+  icon: MapPin, 
+  text: "ROOM 2nd FLR, C# BLDG NO.17#, YINCHANG AREA, BEIHUAN LIANGSHI ROAD, SHISHI CITY, FUJIAN P.R. CHINA. P.C: 362700" 
+},
+  { icon: Phone, text: "+86 0595-88568700", href: "tel:+86 0595-88568700" },
+  { icon: Printer, text: "+86-0595-88569700" },
+  { icon: Mail, text: "shenzhen@mayaexports.com", href: "mailto:shenzhen@mayaexports.com" },
 ]
 
 const chinaTeam = [
   {
-    name: "Mr. David Chen",
+    name: "Mr. Mike (Sonu)",
     title: "Director – China Operations",
-    email: "david.chen@mayaexports.com",
-    phone: "+86 138 0000 1111",
+    email: "sonu@mayaexportsltd.com",
+    phone: "+86 13506082700",
     whatsapp: "8613800001111",
   },
   {
-    name: "Ms. Linda Wang",
+    name: "Ms. Jenny (roshni)",
     title: "Senior Sourcing Manager",
-    email: "linda.wang@mayaexports.com",
-    phone: "+86 138 0000 2222",
-    whatsapp: "8613800002222",
+    email: "roshni@mayaexportsltd.com",
+    phone: "+86 135 0608 2700",
+    whatsapp: "8613506082700",
   },
 ]
 
 const hkOffice = [
-  { icon: MapPin,  text: "Unit 1205, 12/F, Hang Seng Building, 77 Des Voeux Road Central, Hong Kong" },
-  { icon: Phone,   text: "+852 2111 9999", href: "tel:+85221119999" },
-  { icon: Printer, text: "+852 2111 9998" },
-  { icon: Mail,    text: "hongkong@mayaexports.com", href: "mailto:hongkong@mayaexports.com" },
+  {
+  icon: MapPin,
+  text: "KENSINGTON PLAZA, 98 PARKES STREET, JORDAN, KOWLOON, HONG KONG."
+},
+  { icon: Phone, text: "+852 685880690", href: "tel:+852 685880690" },
+  { icon: Printer, text: "+852 685880690" },
+  { icon: Mail, text: "sonu@mayaexportsltd.com", href: "mailto:sonu@mayaexportsltd.com" },
 ]
 
 /* ─── ContactRow helper ─────────────────────────────────────────────────── */
@@ -112,9 +118,8 @@ export default function Footer() {
           </Link>
 
           <p className="mt-8 max-w-xl text-base leading-relaxed text-slate-400">
-            Maya Exports Limited — a globally trusted sourcing and export company with
-            over 25 years of excellence. Delivering premium Garments, Fabrics, Footwear,
-            Home Textiles and Electronics to buyers in 40+ countries worldwide.
+            Maya Exports Limited — Your trusted global partner for premium quality exports with 25+ years of excellence.
+            Established in 2000, Maya Exports has been at the forefront of export industry, blending traditional sourcing with modern quality standards to deliver premium products worldwide.
           </p>
 
           {/* Social icons */}

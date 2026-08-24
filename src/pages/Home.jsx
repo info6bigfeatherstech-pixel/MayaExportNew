@@ -15,8 +15,8 @@ export default function Home() {
       {/* <FeaturedProducts /> */}
       <Categories />
       <WhyChooseUs />
-      <GlobalReach />
       <Process />
+      <GlobalReach />
       <CTASection />
     </>
   )

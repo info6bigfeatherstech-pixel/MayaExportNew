@@ -16,7 +16,7 @@ export const categories = [
     name: "Footwear",
     slug: "footwear",
     description: "Premium shoes and footwear collections for global retail markets.",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80&fit=crop",
+    image: "/images/shoes2.jpg",
   },
   {
     name: "Home Textile",

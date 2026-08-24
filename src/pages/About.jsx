@@ -13,10 +13,10 @@ const values = [
 ]
 
 const stats = [
-  { value: "15+", label: "Countries Served" },
+  { value: "50+", label: "Countries Served" },
   { value: "50+", label: "Global Buyers" },
   { value: "100K+", label: "Units Exported" },
-  { value: "10+", label: "Years Experience" },
+  { value: "25+", label: "Years Experience" },
 ]
 
 export default function About() {
@@ -26,7 +26,7 @@ export default function About() {
         eyebrow="Our Company"
         title="About Our Company"
         subtitle="Connecting skilled garment manufacturers with international buyers through reliable, quality-driven export solutions."
-        image="/images/hero-about.png"
+        image="/images/manufacturinggar.avif"
       />
 
       {/* Story */}
@@ -47,17 +47,10 @@ export default function About() {
               <SectionHeading eyebrow="Company Story" title="A Bridge Between Makers and Markets" />
               <div className="mt-6 space-y-4 leading-relaxed text-stone-500">
                 <p>
-                  Global Threads Exports was founded on a simple idea: international
-                  fashion buyers deserve a sourcing partner who treats their standards as
-                  their own. Over the past decade, we have grown into a trusted link
-                  between capable garment manufacturers and the brands, retailers, and
-                  wholesalers that rely on them.
+                  Maya Exports Ltd. was built on a simple vision: to deliver quality products and reliable global trade solutions that businesses can trust. With over 25 years of experience, we have grown into an established manufacturing and export company serving customers across 50+ countries.
                 </p>
                 <p>
-                  We handle the complexity of global garment trade — development, quality,
-                  compliance, and logistics — so our clients can focus on building their
-                  businesses. Every shipment reflects our commitment to consistency,
-                  craftsmanship, and long-term trust.
+                  From product manufacturing and sourcing to quality control, compliance, and global logistics, we manage every stage with precision and professionalism. Our focus is on delivering consistent quality, building strong business relationships, and creating long-term value for our customers worldwide.
                 </p>
               </div>
             </div>

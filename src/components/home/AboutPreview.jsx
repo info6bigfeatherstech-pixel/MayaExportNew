@@ -23,7 +23,7 @@ const features = [
 
 export default function AboutPreview() {
   return (
-    <section className="bg-ivory py-24 md:py-32">
+    <section className="bg-ivory pt-24 md:pt-32 pb-0">
       <Container>
         {/* Switch to a wider left column: 55% image / 45% content */}
         <div className="grid items-center gap-16 lg:grid-cols-[1.2fr_1fr] lg:gap-20">

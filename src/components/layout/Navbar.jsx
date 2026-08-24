@@ -62,7 +62,8 @@ export default function Navbar() {
             <img
               src="/images/logo.png"
               alt="Global Threads Exports"
-              className="h-20 w-auto md:h-24"
+              className="h-20 w-auto transition-all duration-300 md:h-24"
+              style={{ filter: "brightness(1.2) contrast(1.05)" }}
             />
           </Link>
 

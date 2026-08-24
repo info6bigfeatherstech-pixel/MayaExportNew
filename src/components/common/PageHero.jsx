@@ -4,19 +4,19 @@ import Container from "./Container.jsx"
 // Consistent inner-page hero with an optional background image.
 export default function PageHero({ eyebrow, title, subtitle, image }) {
   return (
-    <section className="relative overflow-hidden bg-ink pb-16 pt-36 text-ivory md:pb-24 md:pt-48">
+    <section className="relative flex min-h-[55vh] items-center overflow-hidden bg-ink pb-24 pt-40 text-ivory md:min-h-[74vh] md:pb-32 md:pt-52">
       {image && (
         <>
           <img
             src={image}
             alt=""
             aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-cover opacity-30"
+            className="absolute inset-0 h-full w-full object-cover object-top opacity-75"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/30 to-transparent" />
         </>
       )}
-      <Container className="relative z-10">
+      <Container className="relative z-10 w-full">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}

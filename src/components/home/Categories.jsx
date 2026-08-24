@@ -3,22 +3,7 @@ import { ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
 import { categories } from "../../data/categories.js"
 
-/**
- * Editorial staggered product showcase.
- *
- * Layout system: FLEXBOX (converted from CSS Grid).
- *
- * Each category row is an independent flex row:
- *   Even (0,2,4) → flex-row        : text | image
- *   Odd  (1,3)   → flex-row-reverse: text | image (visually: image | text)
- *
- * The stagger is reproduced with:
- *   - lg:-mt-24 on rows after the first  (vertical interlock between rows)
- *   - pt-16 / pt-24 on the text column   (vertical offset within each row)
- *
- * Text and image columns use flex-basis so widths are explicit and
- * independent of sibling content length.
- */
+
 
 const fadeIn = (dir = 0) => ({
   hidden: { opacity: 0, x: dir },
@@ -54,18 +39,9 @@ export default function Categories() {
               key={cat.slug}
               // Negative top margin produces the vertical interlock / stagger.
               // Applied only on desktop (lg:) — mobile stacks cleanly.
-              className={`relative ${i > 0 ? "lg:-mt-24" : ""}`}
+              className={`relative z-0 hover:z-20 ${i > 0 ? "lg:-mt-24" : ""}`}
             >
-              {/*
-               * FLEX ROW — the core layout unit.
-               *
-               * flex-row         → even: [text][image]
-               * flex-row-reverse → odd:  [image][text]  (DOM order stays text-first
-               *                          so tab/read order is always title → image)
-               *
-               * On mobile (below lg) we always stack vertically with flex-col,
-               * and for odd rows we reverse back so image comes first visually.
-               */}
+              
               <div
                 className={[
                   "flex items-start gap-0",
@@ -82,10 +58,7 @@ export default function Categories() {
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true, margin: "-80px" }}
-                  // flex-basis: ~42% of the row width (mirrors the old col-span-5/12)
-                  // align-self: flex-start so it never stretches to image height
-                  // pt-16 / pt-24: vertical offset to float text mid-image (stagger)
-                  // py-10 on mobile only
+                  
                   style={{ flexBasis: "42%", flexShrink: 0 }}
                   className={[
                     "flex flex-col justify-start self-start",
@@ -132,21 +105,19 @@ export default function Categories() {
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true, margin: "-80px" }}
-                  // flex-basis: ~58% — slightly wider than text (mirrors old col-span-6/12)
-                  // align-self: flex-start so image sits at the top of the row
+                  
                   style={{ flexBasis: "58%", flexShrink: 0 }}
                   className="self-start w-full"
                 >
-                  <Link to="/products" className="group block">
+                  <Link
+                    to="/products"
+                    className={[
+                      "group block w-full max-w-[480px]",
+                      isEven ? "ml-auto" : "mr-auto",
+                    ].join(" ")}
+                  >
                     <div
-                      className={[
-                        "relative overflow-hidden rounded-xl",
-                        "shadow-[0_8px_40px_rgba(0,0,0,0.12)]",
-                        "w-full max-w-[480px]",
-                        // Even: right-align image within its column (text is on the left)
-                        // Odd:  left-align  image within its column (text is on the right)
-                        isEven ? "ml-auto" : "mr-auto",
-                      ].join(" ")}
+                      className="relative overflow-hidden rounded-xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] w-full isolate [transform:translateZ(0)]"
                       style={{ aspectRatio: "5/5" }}
                     >
                       <img
@@ -158,7 +129,7 @@ export default function Categories() {
                       {/* Subtle vignette */}
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/20 via-transparent to-transparent" />
                       {/* Category badge */}
-                      <div className="absolute bottom-4 right-4 bg-white/90 px-3 py-1.5 backdrop-blur-sm">
+                      <div className="pointer-events-none absolute bottom-4 right-4 bg-white/90 px-3 py-1.5 backdrop-blur-sm">
                         <span className="text-[10px] font-semibold uppercase tracking-widest text-charcoal">
                           {cat.name}
                         </span>

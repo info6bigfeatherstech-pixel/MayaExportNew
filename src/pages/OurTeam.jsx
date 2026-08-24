@@ -7,8 +7,8 @@ export default function OurTeam() {
     <>
       <PageHero
         title="Our Team"
-        subtitle="Meet the people behind Global Threads — experienced professionals passionate about quality garments and global trade."
-        image="/images/hero-about.png"
+        subtitle="Meet the team behind Maya Exports — experienced professionals dedicated to quality manufacturing, reliable sourcing, and seamless global trade."
+        image="/images/ourteam.avif"
       />
       <section className="py-20 md:py-28">
         <Container>
