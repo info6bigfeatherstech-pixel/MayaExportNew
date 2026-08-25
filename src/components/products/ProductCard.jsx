@@ -2,9 +2,11 @@ import { Link } from "react-router-dom"
 import { ArrowUpRight } from "lucide-react"
 
 // Editorial catalog card: image on top, information below (no text over image).
+// Accepts an optional `linkTo` override on the product object for nested routes.
 export default function ProductCard({ product }) {
+  const href = product.linkTo || `/products/${product.id}`
   return (
-    <Link to={`/products/${product.id}`} className="group flex flex-col">
+    <Link to={href} className="group flex flex-col">
       <div className="relative aspect-[4/5] overflow-hidden bg-stone-100">
         <img
           src={product.image || "/placeholder.svg"}

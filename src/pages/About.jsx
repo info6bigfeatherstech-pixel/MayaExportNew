@@ -1,15 +1,67 @@
+import React, { useState, useEffect, useRef } from "react"
 import PageHero from "../components/common/PageHero.jsx"
 import Container from "../components/common/Container.jsx"
 import SectionHeading from "../components/common/SectionHeading.jsx"
 import Reveal from "../components/common/Reveal.jsx"
 import Button from "../components/common/Button.jsx"
 
+// Custom Component for Counting Animation on Scroll
+const AnimatedStat = ({ value }) => {
+  const [count, setCount] = useState(0);
+  const countRef = useRef(null);
+
+  // Extract number and suffix (e.g., "100K+" -> number: 100, suffix: "K+")
+  const match = value.match(/(\d+)(.*)/);
+  const targetNumber = match ? parseInt(match[1], 10) : 0;
+  const suffix = match ? match[2] : "";
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          let start = 0;
+          const duration = 2000; // Animation duration in milliseconds (2 seconds)
+          const frameDuration = 1000 / 60; // 60 FPS
+          const totalFrames = Math.round(duration / frameDuration);
+          const easeOutQuad = t => t * (2 - t); // Smooth easing effect
+
+          let frame = 0;
+          const counter = setInterval(() => {
+            frame++;
+            const progress = easeOutQuad(frame / totalFrames);
+            const currentCount = Math.round(targetNumber * progress);
+
+            if (frame === totalFrames) {
+              setCount(targetNumber);
+              clearInterval(counter);
+            } else {
+              setCount(currentCount);
+            }
+          }, frameDuration);
+
+          // Disconnect observer after animation plays once
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 } // Trigger when 50% of the element is visible
+    );
+
+    if (countRef.current) {
+      observer.observe(countRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [targetNumber]);
+
+  return <span ref={countRef}>{count}{suffix}</span>;
+};
+
 const values = [
-  { title: "Quality", text: "Uncompromising standards from fabric to finished garment." },
-  { title: "Integrity", text: "Transparent, honest dealing in every transaction." },
-  { title: "Reliability", text: "Consistent delivery buyers can plan their business around." },
-  { title: "Innovation", text: "Continuous improvement in products and processes." },
-  { title: "Partnership", text: "Relationships built to last, not single transactions." },
+  { title: "Quality", text: "We maintain uncompromising quality standards at every stage, from careful material selection and manufacturing to final inspection and delivery." },
+  { title: "Integrity", text: "We believe lasting business relationships are built on honesty, transparency, and responsible practices in every interaction and transaction." },
+  { title: "Reliability", text: "Our customers can depend on us for consistent product quality, timely delivery, clear communication, and dependable service across every order." },
+  { title: "Innovation", text: "We continuously improve our products, manufacturing processes, and working methods to deliver smarter solutions and meet the evolving needs of global markets." },
+  { title: "Partnership", text: "We build long-term relationships with customers and partners through trust, collaboration, mutual growth, and a commitment to creating value beyond individual transactions." },
 ]
 
 const stats = [
@@ -58,7 +110,7 @@ export default function About() {
 
             <Reveal delay={0.2}>
               <div className="flex flex-col justify-center">
-                <h2 className="font-serif text-3xl font-medium italic leading-tight text-charcoal sm:text-4xl md:text-[44px] lg:text-[48px] xl:text-[52px]">
+                <h2 className="font-serif text-3xl font-medium leading-normal text-charcoal sm:text-4xl md:text-[44px] lg:text-[48px] xl:text-[52px]">
                   A Bridge Between Makers and Markets
                 </h2>
                 <div className="mt-8 space-y-6 text-[17px] leading-relaxed text-stone-600 md:text-lg">
@@ -201,24 +253,63 @@ export default function About() {
         </Container>
       </section>
 
-      {/* 4. Values */}
+      {/* 4. Values - Updated Design */}
       <section className="bg-ivory py-24 md:py-32">
         <Container>
-          <SectionHeading eyebrow="What Guides Us" title="Our Values" align="center" className="mx-auto" />
-          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {values.map((value, i) => (
-              <Reveal key={value.title} delay={(i % 5) * 0.06}>
-                <div className="border-t-2 border-bronze pt-6">
-                  <h3 className="font-serif text-xl font-medium text-charcoal">{value.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-500">{value.text}</p>
-                </div>
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
+            
+            {/* Left Side: Image graphic */}
+            <Reveal>
+              <div className="relative h-full min-h-[400px] w-full overflow-hidden rounded-[20px] shadow-sm md:min-h-[500px]">
+                {/* Temporary placeholder image - Replace src when ready */}
+                <img
+                  src="./images/partnership.png"
+                  alt="Our core values in manufacturing"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+            </Reveal>
+
+            {/* Right Side: Values List */}
+            <div>
+              <Reveal>
+                <SectionHeading eyebrow="What Guides Us" title="Our Core Values" align="left" />
               </Reveal>
-            ))}
+              
+              <div className="mt-10 space-y-6 md:mt-14">
+                {values.map((value, i) => (
+                  <Reveal key={value.title} delay={i * 0.1}>
+                    <div className="group flex items-start gap-5 sm:gap-6">
+                      
+                      {/* Number/Icon Indicator */}
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-bronze/10 text-bronze transition-colors duration-300 group-hover:bg-bronze group-hover:text-white sm:h-14 sm:w-14">
+                        <span className="font-serif text-lg font-bold sm:text-xl">
+                          0{i + 1}
+                        </span>
+                      </div>
+                      
+                      {/* Value Content */}
+                      <div>
+                        <h3 className="font-serif text-xl font-medium text-charcoal sm:text-2xl">
+                          {value.title}
+                        </h3>
+                        <p className="mt-2 text-[15px] leading-relaxed text-stone-600 sm:text-base">
+                          {value.text}
+                        </p>
+                      </div>
+                      
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+            
           </div>
         </Container>
       </section>
 
-      {/* 5. Stats */}
+      {/* 5. Stats - Now with CountUp Animation */}
       <section className="bg-ink py-20 text-ivory md:py-24">
         <Container>
           <div className="grid grid-cols-2 gap-y-12 lg:grid-cols-4">
@@ -226,7 +317,8 @@ export default function About() {
               <Reveal key={stat.label} delay={(i % 4) * 0.08}>
                 <div className="text-center">
                   <div className="font-serif text-5xl font-medium text-bronze-light md:text-6xl">
-                    {stat.value}
+                    {/* AnimatedStat is replacing static text here */}
+                    <AnimatedStat value={stat.value} />
                   </div>
                   <div className="mt-3 text-xs font-medium uppercase tracking-widest text-ivory/60">
                     {stat.label}
