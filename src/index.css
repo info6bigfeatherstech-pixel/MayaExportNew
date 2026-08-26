@@ -52,3 +52,13 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@layer components {
+  aside > div:first-child > div:first-child > p:first-child {
+    width: 180px;
+    height: 48px;
+    overflow: hidden;
+    background: url("/images/logo.png") left center / contain no-repeat;
+    text-indent: -9999px;
+  }
+}

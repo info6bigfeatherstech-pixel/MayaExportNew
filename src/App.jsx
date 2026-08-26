@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, useLocation } from "react-router-dom"
 import Navbar from "./components/layout/Navbar.jsx"
 import Footer from "./components/layout/Footer.jsx"
 import ScrollToTop from "./components/common/ScrollToTop.jsx"
@@ -23,8 +23,21 @@ import OurTeam from "./pages/OurTeam.jsx"
 import TradeEvents from "./pages/TradeEvents.jsx"
 import Career from "./pages/Career.jsx"
 import Contact from "./pages/Contact.jsx"
+import AdminDashboard from "./pages/AdminPanel.jsx"
 
 export default function App() {
+  const location = useLocation()
+  const isAdmin = location.pathname.startsWith("/admin")
+
+  if (isAdmin) {
+    return (
+      <>
+        <ScrollToTop />
+        <Routes><Route path="/admin/*" element={<AdminDashboard />} /></Routes>
+      </>
+    )
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollToTop />
@@ -106,4 +119,3 @@ export default function App() {
     </div>
   )
 }
-
