@@ -95,8 +95,8 @@ export default function Navbar() {
               to="/contact"
               className={`group inline-flex items-center gap-2 px-6 py-3 text-sm font-medium uppercase tracking-wider transition-colors duration-300 ${
                 isTransparent
-                  ? "bg-ivory text-charcoal hover:bg-bronze hover:text-ivory"
-                  : "bg-charcoal text-ivory hover:bg-bronze"
+                  ? "bg-[#5DBFD8] text-charcoal hover:bg-bronze hover:text-ivory"
+                  : "bg-[#5DBFD8] text-ivory hover:bg-bronze"
               }`}
             >
               Enquire Now
