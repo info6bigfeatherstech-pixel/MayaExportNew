@@ -96,7 +96,8 @@ export default function Contact() {
       body: JSON.stringify({
         access_key: "9c5ffe33-9904-415c-8ae6-d6ebda66fb14",
 
-        subject: `New Maya Exports Enquiry - ${form.fullName}`,
+        // Web3Forms email subject line
+        from_subject: `New Maya Exports Enquiry - ${form.fullName}`,
 
         fullName: form.fullName,
         company: form.company,

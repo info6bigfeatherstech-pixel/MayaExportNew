@@ -1,22 +1,47 @@
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
-import { categories } from "../../data/categories.js"
-
-
+import { getCategories } from "../../api/categories.js"
+import { categories as fallbackCategories } from "../../data/categories.js"
 
 const fadeIn = (dir = 0) => ({
   hidden: { opacity: 0, x: dir },
   show: {
-    opacity: 1, x: 0,
+    opacity: 1,
+    x: 0,
     transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
   },
 })
 
 export default function Categories() {
+  const [liveCategories, setLiveCategories] = useState([])
+
+  useEffect(() => {
+    let isMounted = true
+    getCategories({ status: "Active" })
+      .then((res) => {
+        if (!isMounted) return
+        const data = Array.isArray(res) ? res : res?.data
+        if (data && data.length > 0) {
+          setLiveCategories(data)
+        } else {
+          setLiveCategories(fallbackCategories)
+        }
+      })
+      .catch(() => {
+        if (isMounted) setLiveCategories(fallbackCategories)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const categories = liveCategories.length > 0 ? liveCategories : fallbackCategories
+
   return (
     <section className="overflow-hidden bg-ivory">
-
       {/* ── Section header ── */}
       <div className="mx-auto max-w-[1280px] px-6 pt-20 pb-4 lg:px-16">
         <div className="border-b border-charcoal/10 pb-8">
@@ -33,15 +58,15 @@ export default function Categories() {
       <div className="mx-auto max-w-[1280px] px-6 pb-24 lg:px-16">
         {categories.map((cat, i) => {
           const isEven = i % 2 === 0 // even → text left, image right
+          const catId = cat._id || cat.slug || i
 
           return (
             <div
-              key={cat.slug}
+              key={catId}
               // Negative top margin produces the vertical interlock / stagger.
               // Applied only on desktop (lg:) — mobile stacks cleanly.
               className={`relative z-0 hover:z-20 ${i > 0 ? "lg:-mt-24" : ""}`}
             >
-              
               <div
                 className={[
                   "flex items-start gap-0",
@@ -51,21 +76,19 @@ export default function Categories() {
                   isEven ? "lg:flex-row" : "lg:flex-row-reverse",
                 ].join(" ")}
               >
-
                 {/* ── TEXT BLOCK ── */}
                 <motion.div
                   variants={fadeIn(isEven ? -28 : 28)}
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true, margin: "-80px" }}
-                  
                   style={{ flexBasis: "42%", flexShrink: 0 }}
                   className={[
                     "flex flex-col justify-start self-start",
-                    "py-10",                          // mobile top+bottom padding
+                    "py-10", // mobile top+bottom padding
                     isEven
-                      ? "lg:py-0 lg:pt-16 lg:pr-12"  // text-left col: offset down + right gap
-                      : "lg:py-0 lg:pt-16 lg:pl-16",  // text-right col: offset down + left gap
+                      ? "lg:py-0 lg:pt-16 lg:pr-12" // text-left col: offset down + right gap
+                      : "lg:py-0 lg:pt-16 lg:pl-16", // text-right col: offset down + left gap
                   ].join(" ")}
                 >
                   {/* Ghost index number */}
@@ -105,7 +128,6 @@ export default function Categories() {
                   initial="hidden"
                   whileInView="show"
                   viewport={{ once: true, margin: "-80px" }}
-                  
                   style={{ flexBasis: "58%", flexShrink: 0 }}
                   className="self-start w-full"
                 >
@@ -121,7 +143,7 @@ export default function Categories() {
                       style={{ aspectRatio: "5/5" }}
                     >
                       <img
-                        src={cat.image}
+                        src={cat.image || "/images/shoes2.jpg"}
                         alt={cat.name}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-[1100ms] ease-out group-hover:scale-[1.04]"
@@ -137,13 +159,11 @@ export default function Categories() {
                     </div>
                   </Link>
                 </motion.div>
-
               </div>
             </div>
           )
         })}
       </div>
-
     </section>
   )
 }
