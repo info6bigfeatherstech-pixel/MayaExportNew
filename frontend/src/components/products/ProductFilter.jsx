@@ -2,16 +2,50 @@ import { useRef, useState, useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
 import { ChevronDown, ChevronRight } from "lucide-react"
+import {
+  menSubcategories,
+  womenSubcategories,
+  childrenSubcategories,
+  kidsSubcategories,
+} from "../../data/garments.js"
 
 // ─── Per-category dropdown configs ───────────────────────────────────────────
 const DROPDOWN_CONFIGS = {
   Garments: {
     label: "Garments",
     items: [
-      { label: "Men", to: "/products/garments/men" },
-      { label: "Women", to: "/products/garments/women" },
-      { label: "Children", to: "/products/garments/children" },
-      { label: "Kids", to: "/products/garments/kids" },
+      {
+        label: "Men",
+        to: "/products/garments/men",
+        subItems: menSubcategories.map((subcategory) => ({
+          label: subcategory.label,
+          to: `/products/garments/men/${subcategory.slug}`,
+        })),
+      },
+      {
+        label: "Women",
+        to: "/products/garments/women",
+        subItems: womenSubcategories.map((subcategory) => ({
+          label: subcategory.label,
+          to: `/products/garments/women/${subcategory.slug}`,
+        })),
+      },
+      {
+        label: "Children",
+        to: "/products/garments/children",
+        subItems: childrenSubcategories.map((subcategory) => ({
+          label: subcategory.label,
+          to: `/products/garments/children/${subcategory.slug}`,
+        })),
+      },
+      {
+        label: "Kids",
+        to: "/products/garments/kids",
+        subItems: kidsSubcategories.map((subcategory) => ({
+          label: subcategory.label,
+          to: `/products/garments/kids/${subcategory.slug}`,
+        })),
+      },
     ],
   },
   Footwear: {

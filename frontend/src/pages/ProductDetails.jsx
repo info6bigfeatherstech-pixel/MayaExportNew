@@ -1,16 +1,19 @@
 import { Link, useParams } from "react-router-dom"
+import { useProductCatalog } from "../catalog/ProductCatalog.jsx"
 import { ArrowLeft, Check } from "lucide-react"
 import Container from "../components/common/Container.jsx"
 import Button from "../components/common/Button.jsx"
 import ProductCard from "../components/products/ProductCard.jsx"
 import Reveal from "../components/common/Reveal.jsx"
-import { getProductById, products } from "../data/products.js"
 
 export default function ProductDetails() {
   const { id } = useParams()
-  const product = getProductById(id)
+  const { products, loading, error } = useProductCatalog()
+  const product = products.find((item) => item.id === id || item._id === id || item.displayId === id)
 
-  if (!product) {
+  if (loading) return <section className="flex min-h-[70vh] items-center justify-center bg-ivory pt-24 text-stone-500">Loading product…</section>
+
+  if (!product || error) {
     return (
       <section className="flex min-h-[70vh] items-center justify-center bg-ivory pt-24">
         <Container className="text-center">
@@ -85,7 +88,7 @@ export default function ProductDetails() {
                   Available Colors
                 </h3>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
+                  {(product.colors || []).map((color) => (
                     <span
                       key={color}
                       className="border border-charcoal/15 px-3 py-1.5 text-sm text-charcoal/80"
@@ -101,7 +104,7 @@ export default function ProductDetails() {
                   Available Sizes
                 </h3>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
+                  {(product.sizes || []).map((size) => (
                     <span
                       key={size}
                       className="flex h-10 min-w-[2.75rem] items-center justify-center border border-charcoal/15 px-2 text-sm text-charcoal/80"

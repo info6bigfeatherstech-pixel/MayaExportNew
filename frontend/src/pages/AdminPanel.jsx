@@ -25,7 +25,6 @@ import {
   initialCustomers,
   initialInquiries,
   initialOrders,
-  initialProducts,
 } from "../data/adminData.js"
 
 const nav = [
@@ -66,7 +65,7 @@ export default function AdminPanel() {
   const navigate = useNavigate()
   const view = nav.find(([, path]) => path === location.pathname)?.[0] || "Overview"
 
-  const [products, setProducts] = useState(initialProducts)
+  const [products, setProducts] = useState([])
   const [categories, setCategories] = useState(initialCategories)
   const [customers, setCustomers] = useState(initialCustomers)
   const [orders, setOrders] = useState(initialOrders)
@@ -79,6 +78,7 @@ export default function AdminPanel() {
   const [confirm, setConfirm] = useState(null)
   const [profile, setProfile] = useState(null)
   const [notice, setNotice] = useState("")
+  const [saving, setSaving] = useState(false)
 
   const alert = (text) => {
     setNotice(text)
@@ -97,7 +97,7 @@ export default function AdminPanel() {
       ])
 
       const fetchedProds = Array.isArray(prodsRes) ? prodsRes : prodsRes?.data
-      if (fetchedProds && fetchedProds.length > 0) {
+      if (fetchedProds) {
         setProducts(
           fetchedProds.map((p) => ({
             ...p,
@@ -164,15 +164,9 @@ export default function AdminPanel() {
   const save = async (type, record, imageFiles) => {
     const isEdit = Boolean(record._id || record.id)
     const targetId = record._id || record.id
+    setSaving(true)
 
-    // 1. Instant UI update
-    if (type === "product") {
-      setProducts((all) =>
-        isEdit
-          ? all.map((x) => (x._id === targetId || x.id === targetId ? { ...x, ...record } : x))
-          : [{ ...record, id: record.displayId || record.id || `PRD-${Date.now().toString().slice(-5)}` }, ...all]
-      )
-    } else if (type === "category") {
+    if (type === "category") {
       setCategories((all) =>
         isEdit
           ? all.map((x) => (x._id === targetId || x.id === targetId ? { ...x, ...record } : x))
@@ -198,24 +192,23 @@ export default function AdminPanel() {
       )
     }
 
-    setForm(null)
-    alert(`${type[0].toUpperCase() + type.slice(1)} saved`)
-
-    // 2. Persist to MongoDB Atlas via Backend API
     try {
       if (type === "product") {
+        let saved
         if (record._id) {
-          await updateProduct(record._id, record, imageFiles)
+          saved = await updateProduct(record._id, record, imageFiles)
         } else if (record.id && (record.id.startsWith("GE-") || record.id.startsWith("FB-") || record.id.startsWith("FT-") || record.id.startsWith("HT-") || record.id.startsWith("EA-"))) {
-          await updateProduct(record.id, record, imageFiles)
+          saved = await updateProduct(record.id, record, imageFiles)
         } else {
-          const created = await createProduct(record, imageFiles)
-          if (created?._id) {
-            setProducts((all) =>
-              all.map((p) => (p.id === record.id ? { ...p, _id: created._id, id: created.displayId || p.id } : p))
-            )
-          }
+          saved = await createProduct(record, imageFiles)
         }
+        // The server is authoritative: never retain a local preview or a
+        // failed optimistic product as public/admin data.
+        await refreshFromAPI()
+        window.dispatchEvent(new Event("products:changed"))
+        setForm(null)
+        alert(`Product ${saved ? "saved" : "updated"}`)
+        return
       } else if (type === "category") {
         if (record._id) await updateCategory(record._id, record, imageFiles?.[0])
         else await createCategory(record, imageFiles?.[0])
@@ -229,8 +222,12 @@ export default function AdminPanel() {
         if (record._id) await updateInquiry(record._id, record)
         else await createInquiry(record)
       }
+      setForm(null)
+      alert(`${type[0].toUpperCase() + type.slice(1)} saved`)
     } catch (err) {
-      console.warn("API save:", err.message)
+      alert(`Could not save ${type}: ${err.message}`)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -250,13 +247,18 @@ export default function AdminPanel() {
 
     try {
       const deleteId = item._id || item.id
-      if (type === "product") await deleteProduct(deleteId)
+      if (type === "product") {
+        await deleteProduct(deleteId)
+        await refreshFromAPI()
+        window.dispatchEvent(new Event("products:changed"))
+      }
       if (type === "category" && item._id) await deleteCategory(item._id)
       if (type === "customer" && item._id) await deleteCustomer(item._id)
       if (type === "order" && item._id) await deleteOrder(item._id)
       if (type === "inquiry" && item._id) await deleteInquiry(item._id)
     } catch (e) {
-      console.warn("API delete:", e.message)
+      if (type === "product") await refreshFromAPI()
+      alert(`Could not delete ${type}: ${e.message}`)
     }
   }
 
@@ -426,6 +428,7 @@ export default function AdminPanel() {
               customers={customers}
               categories={categories}
               onSave={save}
+              saving={saving}
               onClose={() => setForm(null)}
             />
           )}
@@ -758,7 +761,7 @@ function Confirm({ type, item, onClose, onConfirm }) {
   )
 }
 
-function Editor({ type, item, products, categories, customers, onSave, onClose }) {
+function Editor({ type, item, products, categories, customers, onSave, onClose, saving }) {
   const [images, setImages] = useState(
     item?.images?.length ? item.images : item?.image ? [item.image] : []
   )
@@ -794,8 +797,10 @@ function Editor({ type, item, products, categories, customers, onSave, onClose }
         moq: d.moq,
         description: d.description,
         status: d.status || "Active",
-        images: images.length ? images : [v.image || "/placeholder.jpg"],
-        image: images[0] || v.image || "/placeholder.jpg",
+        // Only persisted URLs are sent as retained images. Local FileReader
+        // previews are represented by imageFiles and must never reach MongoDB.
+        images: images.filter((src) => !src.startsWith("data:")),
+        image: images.find((src) => !src.startsWith("data:")) || "/placeholder.jpg",
         updatedAt: "Just now",
       }
     }
@@ -970,8 +975,8 @@ function Editor({ type, item, products, categories, customers, onSave, onClose }
           <Button plain onClick={onClose} type="button">
             Cancel
           </Button>
-          <Button type="submit">
-            Save {type}
+          <Button type="submit" disabled={saving}>
+            {saving ? "Saving…" : `Save ${type}`}
           </Button>
         </div>
       </form>
@@ -1077,10 +1082,11 @@ function ImageField({ images, upload, remove }) {
   )
 }
 
-function Button({ children, onClick, plain, danger, type = "submit" }) {
+function Button({ children, onClick, plain, danger, type = "submit", disabled = false }) {
   return (
     <button
       type={type}
+      disabled={disabled}
       onClick={onClick}
       className={`${plain
         ? "border border-charcoal/15 text-charcoal hover:bg-stone-100"

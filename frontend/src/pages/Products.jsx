@@ -1,47 +1,14 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import PageHero from "../components/common/PageHero.jsx"
 import Container from "../components/common/Container.jsx"
 import ProductFilter from "../components/products/ProductFilter.jsx"
 import ProductGrid from "../components/products/ProductGrid.jsx"
-import { getProducts } from "../api/products.js"
-import { getCategories } from "../api/categories.js"
-import { products as initialProducts, productCategories as initialCategories } from "../data/products.js"
+import { useProductCatalog } from "../catalog/ProductCatalog.jsx"
 
 export default function Products() {
   const [active, setActive] = useState("All")
-  const [allProducts, setAllProducts] = useState(initialProducts)
-  const [categoriesList, setCategoriesList] = useState(initialCategories)
-
-  useEffect(() => {
-    let isMounted = true
-    Promise.all([
-      getProducts({ status: "Active", limit: 100 }).catch(() => null),
-      getCategories({ status: "Active" }).catch(() => null),
-    ]).then(([prodsRes, catsRes]) => {
-      if (!isMounted) return
-
-      const fetchedProds = Array.isArray(prodsRes) ? prodsRes : prodsRes?.data
-      if (fetchedProds && fetchedProds.length > 0) {
-        setAllProducts(
-          fetchedProds.map((p) => ({
-            ...p,
-            id: p.displayId || p._id || p.id,
-            fabric: p.details || p.fabric,
-            image: p.images?.[0] || p.image || "/placeholder.jpg",
-          }))
-        )
-      }
-
-      const fetchedCats = Array.isArray(catsRes) ? catsRes : catsRes?.data
-      if (fetchedCats && fetchedCats.length > 0) {
-        setCategoriesList(["All", ...fetchedCats.map((c) => c.name)])
-      }
-    })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
+  const { products: allProducts, loading, error } = useProductCatalog()
+  const categoriesList = useMemo(() => ["All", ...new Set(allProducts.map((p) => p.category).filter(Boolean))], [allProducts])
 
   const filtered = useMemo(
     () => (active === "All" ? allProducts : allProducts.filter((p) => p.category === active)),
@@ -71,7 +38,7 @@ export default function Products() {
           </div>
 
           <div className="mt-12">
-            <ProductGrid products={filtered} />
+            {loading ? <p className="py-20 text-center text-stone-500">Loading products…</p> : error ? <p className="py-20 text-center text-rose-600">{error}</p> : <ProductGrid products={filtered} />}
           </div>
         </Container>
       </section>

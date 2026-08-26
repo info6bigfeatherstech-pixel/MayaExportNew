@@ -2,9 +2,10 @@ import Container from "../common/Container.jsx"
 import Button from "../common/Button.jsx"
 import SectionHeading from "../common/SectionHeading.jsx"
 import ProductSlider from "../products/ProductSlider.jsx"
-import { featuredProducts } from "../../data/products.js"
+import { useProductCatalog } from "../../catalog/ProductCatalog.jsx"
 
 export default function FeaturedProducts() {
+  const { products, loading } = useProductCatalog()
   return (
     <section className="border-y border-charcoal/10 bg-stone-50 py-24 md:py-32">
       <Container>
@@ -22,7 +23,7 @@ export default function FeaturedProducts() {
         </div>
 
         <div className="mt-14">
-          <ProductSlider products={featuredProducts} />
+          {loading ? <p className="text-stone-500">Loading products…</p> : products.length ? <ProductSlider products={products.slice(0, 8)} /> : <p className="text-stone-500">No products available yet.</p>}
         </div>
 
         <div className="mt-10 md:hidden">

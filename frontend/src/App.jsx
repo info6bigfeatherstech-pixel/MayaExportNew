@@ -50,59 +50,59 @@ export default function App() {
           {/* ── Garment hierarchy (must be above /products/:id) ── */}
           <Route
             path="/products/garments/:gender"
-            element={<GarmentGenderPage />}
+            element={<Products />}
           />
           <Route
             path="/products/garments/:gender/:subcategory"
-            element={<GarmentSubcategoryPage />}
+            element={<Products />}
           />
           <Route
             path="/products/garments/:gender/:subcategory/:id"
-            element={<GarmentProductDetail />}
+            element={<ProductDetails />}
           />
 
           {/* ── Footwear hierarchy (must be above /products/:id) ── */}
           <Route
             path="/products/footwear/:gender"
-            element={<FootwearGenderPage />}
+            element={<Products />}
           />
           <Route
             path="/products/footwear/:gender/:subcategory"
-            element={<FootwearSubcategoryPage />}
+            element={<Products />}
           />
           <Route
             path="/products/footwear/:gender/:subcategory/:id"
-            element={<FootwearProductDetail />}
+            element={<ProductDetails />}
           />
 
           {/* ── Fabric hierarchy ── */}
           <Route
             path="/products/fabrics/:subcategory"
-            element={<FabricSubcategoryPage />}
+            element={<Products />}
           />
           <Route
             path="/products/fabrics/:subcategory/:id"
-            element={<FabricProductDetail />}
+            element={<ProductDetails />}
           />
 
           {/* ── Home Textile hierarchy ── */}
           <Route
             path="/products/home-textile/:subcategory"
-            element={<HomeTextileSubcategoryPage />}
+            element={<Products />}
           />
           <Route
             path="/products/home-textile/:subcategory/:id"
-            element={<HomeTextileProductDetail />}
+            element={<ProductDetails />}
           />
 
           {/* ── Electronics & Appliances hierarchy ── */}
           <Route
             path="/products/electronics/:subcategory"
-            element={<ElectronicsSubcategoryPage />}
+            element={<Products />}
           />
           <Route
             path="/products/electronics/:subcategory/:id"
-            element={<ElectronicsProductDetail />}
+            element={<ProductDetails />}
           />
 
           {/* Existing flat product detail */}
