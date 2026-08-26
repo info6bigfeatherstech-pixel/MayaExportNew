@@ -26,6 +26,101 @@ import {
   initialInquiries,
   initialOrders,
 } from "../data/adminData.js"
+import {
+  menSubcategories,
+  womenSubcategories,
+  childrenSubcategories,
+  kidsSubcategories,
+} from "../data/garments.js"
+
+// ── Multi-level category hierarchy (data-driven, easy to extend) ──────────────
+// Shape: { [categoryName]: { subGroups: [{ label, key, subItems: [{ label, key }] }] } | null }
+// If subGroups is null/undefined the category has no sub-levels.
+const CATEGORY_HIERARCHY = {
+  Garments: {
+    subGroups: [
+      {
+        label: "Men",
+        key: "men",
+        subItems: menSubcategories.map((s) => ({ label: s.label, key: s.slug })),
+      },
+      {
+        label: "Women",
+        key: "women",
+        subItems: womenSubcategories.map((s) => ({ label: s.label, key: s.slug })),
+      },
+      {
+        label: "Children",
+        key: "children",
+        subItems: childrenSubcategories.map((s) => ({ label: s.label, key: s.slug })),
+      },
+      {
+        label: "Kids",
+        key: "kids",
+        subItems: kidsSubcategories.map((s) => ({ label: s.label, key: s.slug })),
+      },
+    ],
+  },
+  Footwear: {
+    subGroups: [
+      {
+        label: "Men",
+        key: "men",
+        subItems: [
+          { label: "Sports & Casual Shoes", key: "sports-casual-shoes" },
+          { label: "Slippers & Sandals", key: "slippers-sandals" },
+          { label: "Office Shoes", key: "office-shoes" },
+        ],
+      },
+      {
+        label: "Women",
+        key: "women",
+        subItems: [
+          { label: "Sports & Casual Shoes", key: "sports-casual-shoes" },
+          { label: "Slippers & Sandals", key: "slippers-sandals" },
+          { label: "Flats & Heels", key: "flats-heels" },
+          { label: "Boots", key: "boots" },
+        ],
+      },
+      {
+        label: "Children",
+        key: "children",
+        subItems: [
+          { label: "Sports & Casual Shoes", key: "sports-casual-shoes" },
+          { label: "Slippers & Sandals", key: "slippers-sandals" },
+          { label: "Flats & Heels", key: "flats-heels" },
+          { label: "Boots", key: "boots" },
+        ],
+      },
+      {
+        label: "Kids",
+        key: "kids",
+        subItems: [
+          { label: "Sports & Casual Shoes", key: "sports-casual-shoes" },
+          { label: "Slippers & Sandals", key: "slippers-sandals" },
+          { label: "Flats & Heels", key: "flats-heels" },
+          { label: "Boots", key: "boots" },
+        ],
+      },
+    ],
+  },
+  Fabrics: {
+    subGroups: [
+      { label: "Garments Fabrics", key: "garments-fabrics", subItems: [] },
+      { label: "Home Textile Fabrics", key: "home-textile-fabrics", subItems: [] },
+    ],
+  },
+  "Home Textile": {
+    subGroups: [
+      { label: "Blankets", key: "blankets", subItems: [] },
+    ],
+  },
+  "Electronics & Appliances": {
+    subGroups: [
+      { label: "Home Appliances", key: "home-appliances", subItems: [] },
+    ],
+  },
+}
 
 const nav = [
   ["Overview", "/admin", LayoutDashboard],
@@ -73,7 +168,9 @@ export default function AdminPanel() {
 
   const [menu, setMenu] = useState(false)
   const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState("All")
+  const [filter, setFilter] = useState("All")       // Level-1: main category
+  const [filterSub, setFilterSub] = useState("All")  // Level-2: sub-group (e.g. Men / Women)
+  const [filterSubSub, setFilterSubSub] = useState("All") // Level-3: sub-subcategory slug
   const [form, setForm] = useState(null)
   const [confirm, setConfirm] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -150,15 +247,39 @@ export default function AdminPanel() {
             ? orders
             : inquiries
 
-  const filtered = useMemo(
-    () =>
-      data.filter(
-        (row) =>
-          Object.values(row).flat().join(" ").toLowerCase().includes(query.toLowerCase()) &&
-          (filter === "All" || row.status === filter || row.category === filter)
-      ),
-    [data, query, filter]
-  )
+  const filtered = useMemo(() => {
+    return data.filter((row) => {
+      // ── Text search (unchanged) ──────────────────────────────────────────────
+      const textMatch = Object.values(row).flat().join(" ").toLowerCase().includes(query.toLowerCase())
+      if (!textMatch) return false
+
+      // ── For non-product views: single-level filter by status ─────────────────
+      if (view !== "Products") {
+        return filter === "All" || row.status === filter || row.category === filter
+      }
+
+      // ── For Products: cascading 3-level filter ───────────────────────────────
+      // Level 1 – main category
+      if (filter !== "All" && row.category !== filter) return false
+
+      // Level 2 – sub-group (gender key: "men", "women", etc.)
+      if (filterSub !== "All") {
+        const rowGender = (row.gender || "").toLowerCase()
+        // also fall back to checking subcategory key prefix for non-garment categories
+        const rowSubcat = (row.subcategory || "").toLowerCase()
+        if (rowGender !== filterSub && rowSubcat !== filterSub) return false
+      }
+
+      // Level 3 – sub-subcategory slug
+      if (filterSubSub !== "All") {
+        const rowSubcat = (row.subcategory || "").toLowerCase()
+        const rowPType  = (row.productType || "").toLowerCase()
+        if (rowSubcat !== filterSubSub && rowPType !== filterSubSub) return false
+      }
+
+      return true
+    })
+  }, [data, view, query, filter, filterSub, filterSubSub])
 
   // ── SAVE (Updates React State instantly & persists to MongoDB) ───────────────
   const save = async (type, record, imageFiles) => {
@@ -319,6 +440,8 @@ export default function AdminPanel() {
                 setMenu(false)
                 setQuery("")
                 setFilter("All")
+                setFilterSub("All")
+                setFilterSubSub("All")
               }}
               className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm ${view === label ? "bg-bronze text-white" : "text-stone-300 hover:bg-white/10"
                 }`}
@@ -379,26 +502,74 @@ export default function AdminPanel() {
             />
           ) : (
             <>
-              <div className="mb-5 flex flex-col gap-3 sm:flex-row">
-                <label className="flex flex-1 items-center gap-2 border border-charcoal/10 bg-white px-3 py-2.5">
-                  <Search size={17} className="text-stone-400" />
-                  <input
-                    className="w-full bg-transparent text-sm outline-none"
-                    placeholder={`Search ${view.toLowerCase()}...`}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                  />
-                </label>
-                <select
-                  className="border border-charcoal/10 bg-white px-3 text-sm"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                >
-                  <option>All</option>
-                  {(view === "Products" ? categories.map((c) => c.name) : statuses).map((x) => (
-                    <option key={x}>{x}</option>
-                  ))}
-                </select>
+              <div className="mb-5 flex flex-col gap-3">
+                {/* ── Row 1: Search + Level-1 category select ── */}
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <label className="flex flex-1 items-center gap-2 border border-charcoal/10 bg-white px-3 py-2.5">
+                    <Search size={17} className="text-stone-400" />
+                    <input
+                      className="w-full bg-transparent text-sm outline-none"
+                      placeholder={`Search ${view.toLowerCase()}...`}
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                    />
+                  </label>
+
+                  {/* Level-1 filter */}
+                  <select
+                    className="border border-charcoal/10 bg-white px-3 py-2.5 text-sm min-w-[160px]"
+                    value={filter}
+                    onChange={(e) => {
+                      setFilter(e.target.value)
+                      setFilterSub("All")
+                      setFilterSubSub("All")
+                    }}
+                  >
+                    <option value="All">All {view === "Products" ? "Categories" : ""}</option>
+                    {(view === "Products" ? categories.map((c) => c.name) : statuses).map((x) => (
+                      <option key={x} value={x}>{x}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* ── Row 2: Level-2 sub-group + Level-3 sub-subcategory (Products only, when hierarchy exists) ── */}
+                {view === "Products" && filter !== "All" && CATEGORY_HIERARCHY[filter]?.subGroups?.length > 0 && (
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    {/* Level-2 sub-group dropdown */}
+                    <select
+                      className="border border-bronze/40 bg-white px-3 py-2.5 text-sm min-w-[160px] ring-1 ring-bronze/20"
+                      value={filterSub}
+                      onChange={(e) => {
+                        setFilterSub(e.target.value)
+                        setFilterSubSub("All")
+                      }}
+                    >
+                      <option value="All">All {filter} Groups</option>
+                      {CATEGORY_HIERARCHY[filter].subGroups.map((sg) => (
+                        <option key={sg.key} value={sg.key}>{sg.label}</option>
+                      ))}
+                    </select>
+
+                    {/* Level-3 sub-subcategory dropdown (shown when a sub-group is selected and it has sub-items) */}
+                    {filterSub !== "All" &&
+                      (() => {
+                        const sg = CATEGORY_HIERARCHY[filter].subGroups.find((g) => g.key === filterSub)
+                        if (!sg || !sg.subItems?.length) return null
+                        return (
+                          <select
+                            className="border border-bronze/40 bg-white px-3 py-2.5 text-sm min-w-[200px] ring-1 ring-bronze/20"
+                            value={filterSubSub}
+                            onChange={(e) => setFilterSubSub(e.target.value)}
+                          >
+                            <option value="All">All {sg.label} Subcategories</option>
+                            {sg.subItems.map((si) => (
+                              <option key={si.key} value={si.key}>{si.label}</option>
+                            ))}
+                          </select>
+                        )
+                      })()}
+                  </div>
+                )}
               </div>
 
               <Records

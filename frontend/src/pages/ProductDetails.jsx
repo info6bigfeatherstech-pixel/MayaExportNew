@@ -5,11 +5,32 @@ import Container from "../components/common/Container.jsx"
 import Button from "../components/common/Button.jsx"
 import ProductCard from "../components/products/ProductCard.jsx"
 import Reveal from "../components/common/Reveal.jsx"
+import { useState } from "react"
 
 export default function ProductDetails() {
   const { id } = useParams()
   const { products, loading, error } = useProductCatalog()
   const product = products.find((item) => item.id === id || item._id === id || item.displayId === id)
+
+  /* ── image gallery state (guarantees 4 thumbnails on all products) ── */
+  const rawImages = product?.images?.length
+    ? product.images
+    : product?.image
+    ? [product.image]
+    : ["/placeholder.jpg"]
+
+  const galleryImages =
+    rawImages.length >= 4
+      ? rawImages.slice(0, 4)
+      : [
+          rawImages[0],
+          rawImages[1] || rawImages[0],
+          rawImages[2] || rawImages[0],
+          rawImages[3] || rawImages[1] || rawImages[0],
+        ]
+
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const displayedImage = galleryImages[selectedIndex] || galleryImages[0]
 
   if (loading) return <section className="flex min-h-[70vh] items-center justify-center bg-ivory pt-24 text-stone-500">Loading product…</section>
 
@@ -61,13 +82,44 @@ export default function ProductDetails() {
           </Link>
 
           <div className="mt-8 grid gap-10 pb-24 lg:grid-cols-2 lg:gap-16">
+            {/* ── Product image gallery ── */}
             <Reveal>
-              <div className="aspect-[4/5] overflow-hidden bg-stone-100">
-                <img
-                  src={product.image || "/placeholder.svg"}
-                  alt={product.name}
-                  className="h-full w-full object-cover"
-                />
+              <div className="flex gap-2.5 sm:gap-4">
+                {/* 4 Vertical Thumbnails on Left Side */}
+                <div className="flex flex-col justify-between gap-2 sm:gap-3 w-[18%] sm:w-[20%] shrink-0">
+                  {galleryImages.map((img, idx) => {
+                    const isActive = selectedIndex === idx
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedIndex(idx)}
+                        aria-label={`View product image ${idx + 1}`}
+                        className={`group relative overflow-hidden bg-stone-100 transition-all duration-200 aspect-[4/5] w-full rounded-none text-left p-0 cursor-pointer ${
+                          isActive
+                            ? "ring-2 ring-bronze ring-offset-1 ring-offset-ivory opacity-100"
+                            : "opacity-70 hover:opacity-100 ring-1 ring-charcoal/10"
+                        }`}
+                      >
+                        <img
+                          src={img}
+                          alt={`${product.name} thumbnail ${idx + 1}`}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Main Large Image */}
+                <div className="relative flex-1 aspect-[4/5] min-w-0 overflow-hidden bg-stone-100">
+                  <img
+                    key={displayedImage + selectedIndex}
+                    src={displayedImage}
+                    alt={product.name}
+                    className="h-full w-full object-cover transition-opacity duration-300"
+                  />
+                </div>
               </div>
             </Reveal>
 
