@@ -7,6 +7,11 @@ const { getCache, setCache, deleteCachePattern, TTL } = require("../services/cac
 const { generateId } = require("../utils/generateId");
 const { getFileUrl } = require("../services/uploadService");
 
+const normaliseArray = (value) => {
+  const items = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+  return items.map((item) => String(item).trim()).filter(Boolean);
+};
+
 // Helper to find a product by ObjectId OR displayId
 const findProductDoc = async (idParam) => {
   if (mongoose.Types.ObjectId.isValid(idParam)) {
@@ -82,7 +87,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
   // Handle multi-file upload
   if (req.files && req.files.length > 0) {
-    images = req.files.map((f) => getFileUrl(f.filename));
+    images = [...normaliseArray(images), ...req.files.map((f) => getFileUrl(f.filename))];
     image = images[0];
   } else if (req.file) {
     image = getFileUrl(req.file.filename);
@@ -90,9 +95,9 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 
   // Normalize array fields
-  if (typeof colors === "string") colors = colors.split(",").map((s) => s.trim()).filter(Boolean);
-  if (typeof sizes === "string") sizes = sizes.split(",").map((s) => s.trim()).filter(Boolean);
-  if (typeof images === "string") images = images.split(",").map((s) => s.trim()).filter(Boolean);
+  colors = normaliseArray(colors);
+  sizes = normaliseArray(sizes);
+  images = normaliseArray(images);
 
   const product = await Product.create({
     displayId: displayId || id || generateId("product"),
@@ -151,16 +156,23 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   // Handle new image uploads
   if (req.files && req.files.length > 0) {
+    // `images` is the exact retained gallery sent by the admin.  Appending to
+    // the stored gallery here would make removed images reappear.
     const uploaded = req.files.map((f) => getFileUrl(f.filename));
-    images = [...(product.images || []), ...uploaded];
-    image = image || uploaded[0];
+    images = [...normaliseArray(images), ...uploaded];
+    image = images[0] || "/placeholder.jpg";
   } else if (req.file) {
     image = getFileUrl(req.file.filename);
   }
 
-  if (typeof colors === "string") colors = colors.split(",").map((s) => s.trim()).filter(Boolean);
-  if (typeof sizes === "string") sizes = sizes.split(",").map((s) => s.trim()).filter(Boolean);
-  if (typeof images === "string") images = images.split(",").map((s) => s.trim()).filter(Boolean);
+  if (colors !== undefined) colors = normaliseArray(colors);
+  if (sizes !== undefined) sizes = normaliseArray(sizes);
+  if (images !== undefined) {
+    images = normaliseArray(images);
+    // Keep the card image synchronized with the editable gallery, including
+    // the case where the current cover image has been removed.
+    image = images[0] || "/placeholder.jpg";
+  }
 
   const updatedDisplayId = displayId || id;
 
